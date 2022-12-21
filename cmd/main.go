@@ -12,7 +12,7 @@ func main() {
 	// Define flags for the source and target files.
 	source := flag.String("s", "", "the source file with data to add to the new section")
 	target := flag.String("t", "", "the target file to add a new section to")
-	backdoor := flag.Bool("backdoor", false,
+	backdoor := flag.Bool("b", false,
 		"backdoor the target (modify the entrypoint to point to the new section")
 
 	// Parse the command-line arguments.
@@ -32,5 +32,6 @@ func main() {
 		return
 	}
 
-	addsec.AddSection(*target, uint32(len(data)), data)
+	addsec.AddSection(*target, uint32(len(data)), data, *backdoor)
+
 }
