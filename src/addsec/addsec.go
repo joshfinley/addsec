@@ -17,7 +17,7 @@ func align(size, align, addr uint32) uint32 {
 	return addr + (size/align+1)*align
 }
 
-func AddSection(filepath, secname string, newSecSize uint32, newSecData []byte) error {
+func AddSection(filepath string, newSecSize uint32, newSecData []byte) error {
 
 	file, err := os.OpenFile(filepath, os.O_RDWR, 0644)
 	if err != nil {

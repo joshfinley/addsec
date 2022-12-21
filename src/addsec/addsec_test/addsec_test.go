@@ -8,5 +8,5 @@ import (
 
 func TestAddSection(t *testing.T) {
 	newSecData := []byte{'a', 's', 'd', 'f'}
-	addsec.AddSection("./calc.exe", "new_sec", 4, newSecData)
+	addsec.AddSection("./calc.exe", 4, newSecData)
 }
