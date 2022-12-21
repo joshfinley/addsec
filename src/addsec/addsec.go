@@ -67,7 +67,7 @@ func AddSection(filepath string, newSecSize uint32, newSecData []byte) error {
 		log.Fatal(err)
 	}
 
-	//fileHeader.NumberOfSections += 1
+	fileHeader.NumberOfSections += 1
 
 	// Seek to the file header offset
 	_, err = file.Seek(int64(fileHeaderoffset), 0)
@@ -94,6 +94,14 @@ func AddSection(filepath string, newSecSize uint32, newSecData []byte) error {
 		log.Fatal(err)
 	}
 
+	// // Write the optional header
+	// newImageSize := optHeader.SizeOfImage + newSecSize
+	// optHeader.SizeOfImage += align(newImageSize, optHeader.FileAlignment, 0)
+	// err = binary.Write(file, binary.LittleEndian, optHeader)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+
 	// Seek back to the start of the section table in the file
 	_, err = file.Seek(int64(sectionTableOffset), 0)
 	if err != nil {
@@ -104,7 +112,7 @@ func AddSection(filepath string, newSecSize uint32, newSecData []byte) error {
 	sectionHeader := wintypes.ImageSectionHeader{}
 
 	// Read the existing section headers
-	sectionHeaders := make([]wintypes.ImageSectionHeader, int(ntHeaders.FileHeader.NumberOfSections)-1)
+	sectionHeaders := make([]wintypes.ImageSectionHeader, int(ntHeaders.FileHeader.NumberOfSections))
 	err = binary.Read(file, binary.LittleEndian, sectionHeaders)
 	if err != nil {
 		log.Fatal(err)
@@ -139,6 +147,21 @@ func AddSection(filepath string, newSecSize uint32, newSecData []byte) error {
 	}
 
 	err = binary.Write(file, binary.LittleEndian, sectionHeaders)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Seek to the optional header again to update the size of image
+	optHeaderOffset = int(dosHeader.E_lfanew) + 4 + int(unsafe.Sizeof(fileHeader))
+	_, err = file.Seek(int64(optHeaderOffset), 0)
+	if err != nil {
+		log.Fatal(err)
+	}
+	sizeOfImage := sectionHeader.VirtualAddress + sectionHeader.Misc
+	optHeader.SizeOfImage = sizeOfImage
+
+	// Write the optional header
+	err = binary.Write(file, binary.LittleEndian, optHeader)
 	if err != nil {
 		log.Fatal(err)
 	}
