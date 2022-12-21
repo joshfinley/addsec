@@ -17,7 +17,7 @@ func align(size, align, addr uint32) uint32 {
 	return addr + (size/align+1)*align
 }
 
-func AddSection(filepath string, newSecSize uint32, newSecData []byte) error {
+func AddSection(filepath string, newSecSize uint32, newSecData []byte, backdoor bool) error {
 
 	file, err := os.OpenFile(filepath, os.O_RDWR, 0644)
 	if err != nil {
@@ -159,6 +159,10 @@ func AddSection(filepath string, newSecSize uint32, newSecData []byte) error {
 	}
 	sizeOfImage := sectionHeader.VirtualAddress + sectionHeader.Misc
 	optHeader.SizeOfImage = sizeOfImage
+
+	if backdoor {
+		optHeader.AddressOfEntryPoint = sectionHeader.VirtualAddress
+	}
 
 	// Write the optional header
 	err = binary.Write(file, binary.LittleEndian, optHeader)
